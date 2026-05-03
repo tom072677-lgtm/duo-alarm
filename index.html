@@ -56,6 +56,9 @@
 </head>
 <body>
     <div id="container">
+        <button id="installBtn" style="display:none; background-color:#1CB0F6;">
+    📲 앱으로 설치하기
+</button>
         <h1>duo-alarm ⏰</h1>
         <p>알람 시간을 설정하세요</p>
         
@@ -78,6 +81,19 @@
     </div>
 
     <script>
+        let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBtn').style.display = 'block';
+});
+
+document.getElementById('installBtn').addEventListener('click', async () => {
+    deferredPrompt.prompt();
+    const result = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    document.getElementById('installBtn').style.display = 'none';
+});
     const API_KEY = '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';
     let alarmTime = '';
 
