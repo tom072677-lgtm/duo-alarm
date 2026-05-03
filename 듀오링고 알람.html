@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>duo-alarm</title>
+    <link rel="manifest" href="manifest.json">
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js');
+    }
+</script>
+    <style>
+    body {
+        background-color: #f0f8e8;
+        font-family: 'Arial', sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+    #container {
+        background-color: white;
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        width: 350px;
+    }
+    button {
+        background-color: #58CC02;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-size: 16px;
+        cursor: pointer;
+        margin: 8px;
+    }
+    button:hover { background-color: #46a302; }
+    button:disabled { background-color: #aaa; cursor: not-allowed; }
+    h1 { color: #58CC02; font-size: 32px; }
+    input[type="time"] {
+        border: 2px solid #58CC02;
+        border-radius: 12px;
+        padding: 10px;
+        font-size: 16px;
+        margin: 8px;
+    }
+    #status { color: #666; font-size: 14px; }
+    #uploadSection { display: none; margin-top: 16px; }
+    #uploadSection input[type="file"] { margin: 8px 0; }
+    #analysisResult { margin-top: 12px; font-size: 14px; font-weight: bold; }
+    #preview { max-width: 200px; margin: 8px auto; border-radius: 8px; display: none; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>duo-alarm ⏰</h1>
+        <p>알람 시간을 설정하세요</p>
+        
+        <input type="time" id="alarmTime">
+        <button id="setBtn">알람 설정</button>
+        
+        <p id="status">알람이 설정되지 않았습니다</p>
+
+        <div id="duoSection" style="display: none;">
+            <button id="goBtn">🦜 듀오링고 하러가기</button>
+        </div>
+
+        <div id="uploadSection">
+            <p>듀오링고 완료 화면 스크린샷을 업로드해주세요!</p>
+            <img id="preview" src="" alt="미리보기">
+            <input type="file" id="screenshotInput" accept="image/*">
+            <button id="analyzeBtn">✅ AI로 확인하기</button>
+            <p id="analysisResult"></p>
+        </div>
+    </div>
+
+    <script>
+    const API_KEY = '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';
+    let alarmTime = '';
+
+    function getCurrentTime() {
+        let now = new Date();
+        let hours = String(now.getHours()).padStart(2, '0');
+        let minutes = String(now.getMinutes()).padStart(2, '0');
+        return hours + ':' + minutes;
+    }
+
+    document.getElementById('setBtn').addEventListener('click', function() {
+        let time = document.getElementById('alarmTime').value;
+        if (time === '') {
+            document.getElementById('status').textContent = '시간을 입력해주세요!';
+        } else {
+            alarmTime = time;
+            document.getElementById('status').textContent = time + '에 알람이 설정되었습니다!';
+        }
+    });
+
+    document.getElementById('goBtn').addEventListener('click', function() {
+        window.open('duolingo://');
+        document.getElementById('duoSection').style.display = 'none';
+        document.getElementById('uploadSection').style.display = 'block';
+    });
+
+    // 이미지 미리보기
+    document.getElementById('screenshotInput').addEventListener('change', function() {
+        let file = this.files[0];
+        if (file) {
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let preview = document.getElementById('preview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.getElementById('analyzeBtn').addEventListener('click', async function() {
+        let file = document.getElementById('screenshotInput').files[0];
+        if (!file) {
+            document.getElementById('analysisResult').textContent = '스크린샷을 먼저 업로드해주세요!';
+            document.getElementById('analysisResult').style.color = 'red';
+            return;
+        }
+
+        let btn = document.getElementById('analyzeBtn');
+        btn.disabled = true;
+        btn.textContent = '분석 중...';
+        document.getElementById('analysisResult').textContent = '';
+
+        // 이미지를 base64로 변환
+        let reader = new FileReader();
+        reader.onload = async function(e) {
+            let base64 = e.target.result.split(',')[1];
+            let mediaType = file.type;
+
+            try {
+                let response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': API_KEY,
+                        'anthropic-version': '2023-06-01',
+                        'anthropic-dangerous-direct-browser-access': 'true'
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-haiku-4-5-20251001',
+                        max_tokens: 256,
+                        messages: [{
+                            role: 'user',
+                            content: [
+                                {
+                                    type: 'image',
+                                    source: {
+                                        type: 'base64',
+                                        media_type: mediaType,
+                                        data: base64
+                                    }
+                                },
+                                {
+                                    type: 'text',
+                                    text: '이 이미지가 듀오링고 레슨 완료 화면인지 판별해주세요. 듀오링고 완료 화면이면 "YES", 아니면 "NO"로만 답해주세요.'
+                                }
+                            ]
+                        }]
+                    })
+                });
+
+                let data = await response.json();
+                console.log('API 응답:', JSON.stringify(data));
+if (!data.content || !data.content[0]) {
+    throw new Error('API 응답 오류: ' + JSON.stringify(data));
+}
+let result = data.content[0].text.trim().toUpperCase();
+
+                if (result.includes('YES')) {
+                    document.getElementById('analysisResult').textContent = '✅ 확인됐어요! 알람이 해제됩니다.';
+                    document.getElementById('analysisResult').style.color = 'green';
+                    document.getElementById('uploadSection').style.display = 'none';
+                } else {
+                    document.getElementById('analysisResult').textContent = '❌ 듀오링고 완료 화면이 아니에요. 다시 시도해주세요!';
+                    document.getElementById('analysisResult').style.color = 'red';
+                    btn.disabled = false;
+                    btn.textContent = '✅ AI로 확인하기';
+                }
+            } catch (error) {
+                document.getElementById('analysisResult').textContent = '오류가 발생했어요: ' + error.message;
+                document.getElementById('analysisResult').style.color = 'red';
+                btn.disabled = false;
+                btn.textContent = '✅ AI로 확인하기';
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+
+    setInterval(function() {
+        let now = getCurrentTime();
+        if (alarmTime !== '' && now === alarmTime) {
+            alarmTime = '';
+            document.getElementById('duoSection').style.display = 'block';
+        }
+    }, 1000);
+    </script>
+</body>
+</html>
