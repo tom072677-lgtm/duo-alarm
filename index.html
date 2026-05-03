@@ -57,8 +57,8 @@
 <body>
     <div id="container">
         <button id="installBtn" style="display:none; background-color:#1CB0F6;">
-    📲 앱으로 설치하기
-</button>
+            📲 앱으로 설치하기
+        </button>
         <h1>duo-alarm ⏰</h1>
         <p>알람 시간을 설정하세요</p>
         
@@ -82,143 +82,121 @@
 
     <script>
         let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    document.getElementById('installBtn').style.display = 'block';
-});
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBtn').style.display = 'block';
+        });
 
-document.getElementById('installBtn').addEventListener('click', async () => {
-    deferredPrompt.prompt();
-    const result = await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    document.getElementById('installBtn').style.display = 'none';
-});
-    const API_KEY = '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';
-    let alarmTime = '';
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            deferredPrompt.prompt();
+            const result = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            document.getElementById('installBtn').style.display = 'none';
+        });
 
-    function getCurrentTime() {
-        let now = new Date();
-        let hours = String(now.getHours()).padStart(2, '0');
-        let minutes = String(now.getMinutes()).padStart(2, '0');
-        return hours + ':' + minutes;
-    }
+        let alarmTime = '';
 
-    document.getElementById('setBtn').addEventListener('click', function() {
-        let time = document.getElementById('alarmTime').value;
-        if (time === '') {
-            document.getElementById('status').textContent = '시간을 입력해주세요!';
-        } else {
-            alarmTime = time;
-            document.getElementById('status').textContent = time + '에 알람이 설정되었습니다!';
+        function getCurrentTime() {
+            let now = new Date();
+            let hours = String(now.getHours()).padStart(2, '0');
+            let minutes = String(now.getMinutes()).padStart(2, '0');
+            return hours + ':' + minutes;
         }
-    });
 
-    document.getElementById('goBtn').addEventListener('click', function() {
-        window.open('duolingo://');
-        document.getElementById('duoSection').style.display = 'none';
-        document.getElementById('uploadSection').style.display = 'block';
-    });
+        document.getElementById('setBtn').addEventListener('click', function() {
+            let time = document.getElementById('alarmTime').value;
+            if (time === '') {
+                document.getElementById('status').textContent = '시간을 입력해주세요!';
+            } else {
+                alarmTime = time;
+                document.getElementById('status').textContent = time + '에 알람이 설정되었습니다!';
+            }
+        });
 
-    // 이미지 미리보기
-    document.getElementById('screenshotInput').addEventListener('change', function() {
-        let file = this.files[0];
-        if (file) {
+        document.getElementById('goBtn').addEventListener('click', function() {
+            window.open('duolingo://');
+            document.getElementById('duoSection').style.display = 'none';
+            document.getElementById('uploadSection').style.display = 'block';
+        });
+
+        document.getElementById('screenshotInput').addEventListener('change', function() {
+            let file = this.files[0];
+            if (file) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    let preview = document.getElementById('preview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('analyzeBtn').addEventListener('click', async function() {
+            let file = document.getElementById('screenshotInput').files[0];
+            if (!file) {
+                document.getElementById('analysisResult').textContent = '스크린샷을 먼저 업로드해주세요!';
+                document.getElementById('analysisResult').style.color = 'red';
+                return;
+            }
+
+            let btn = document.getElementById('analyzeBtn');
+            btn.disabled = true;
+            btn.textContent = '분석 중...';
+            document.getElementById('analysisResult').textContent = '';
+
             let reader = new FileReader();
-            reader.onload = function(e) {
-                let preview = document.getElementById('preview');
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+            reader.onload = async function(e) {
+                let base64 = e.target.result.split(',')[1];
+                let mediaType = file.type;
 
-    document.getElementById('analyzeBtn').addEventListener('click', async function() {
-        let file = document.getElementById('screenshotInput').files[0];
-        if (!file) {
-            document.getElementById('analysisResult').textContent = '스크린샷을 먼저 업로드해주세요!';
-            document.getElementById('analysisResult').style.color = 'red';
-            return;
-        }
+                try {
+                    let response = await fetch('/.netlify/functions/analyze', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            imageData: base64,
+                            mediaType: mediaType
+                        })
+                    });
 
-        let btn = document.getElementById('analyzeBtn');
-        btn.disabled = true;
-        btn.textContent = '분석 중...';
-        document.getElementById('analysisResult').textContent = '';
+                    let data = await response.json();
+                    console.log('API 응답:', JSON.stringify(data));
+                    if (!data.content || !data.content[0]) {
+                        throw new Error('API 응답 오류: ' + JSON.stringify(data));
+                    }
+                    let result = data.content[0].text.trim().toUpperCase();
 
-        // 이미지를 base64로 변환
-        let reader = new FileReader();
-        reader.onload = async function(e) {
-            let base64 = e.target.result.split(',')[1];
-            let mediaType = file.type;
-
-            try {
-                let response = await fetch('https://api.anthropic.com/v1/messages', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-api-key': API_KEY,
-                        'anthropic-version': '2023-06-01',
-                        'anthropic-dangerous-direct-browser-access': 'true'
-                    },
-                    body: JSON.stringify({
-                        model: 'claude-haiku-4-5-20251001',
-                        max_tokens: 256,
-                        messages: [{
-                            role: 'user',
-                            content: [
-                                {
-                                    type: 'image',
-                                    source: {
-                                        type: 'base64',
-                                        media_type: mediaType,
-                                        data: base64
-                                    }
-                                },
-                                {
-                                    type: 'text',
-                                    text: '이 이미지가 듀오링고 레슨 완료 화면인지 판별해주세요. 듀오링고 완료 화면이면 "YES", 아니면 "NO"로만 답해주세요.'
-                                }
-                            ]
-                        }]
-                    })
-                });
-
-                let data = await response.json();
-                console.log('API 응답:', JSON.stringify(data));
-if (!data.content || !data.content[0]) {
-    throw new Error('API 응답 오류: ' + JSON.stringify(data));
-}
-let result = data.content[0].text.trim().toUpperCase();
-
-                if (result.includes('YES')) {
-                    document.getElementById('analysisResult').textContent = '✅ 확인됐어요! 알람이 해제됩니다.';
-                    document.getElementById('analysisResult').style.color = 'green';
-                    document.getElementById('uploadSection').style.display = 'none';
-                } else {
-                    document.getElementById('analysisResult').textContent = '❌ 듀오링고 완료 화면이 아니에요. 다시 시도해주세요!';
+                    if (result.includes('YES')) {
+                        document.getElementById('analysisResult').textContent = '✅ 확인됐어요! 알람이 해제됩니다.';
+                        document.getElementById('analysisResult').style.color = 'green';
+                        document.getElementById('uploadSection').style.display = 'none';
+                    } else {
+                        document.getElementById('analysisResult').textContent = '❌ 듀오링고 완료 화면이 아니에요. 다시 시도해주세요!';
+                        document.getElementById('analysisResult').style.color = 'red';
+                        btn.disabled = false;
+                        btn.textContent = '✅ AI로 확인하기';
+                    }
+                } catch (error) {
+                    document.getElementById('analysisResult').textContent = '오류가 발생했어요: ' + error.message;
                     document.getElementById('analysisResult').style.color = 'red';
                     btn.disabled = false;
                     btn.textContent = '✅ AI로 확인하기';
                 }
-            } catch (error) {
-                document.getElementById('analysisResult').textContent = '오류가 발생했어요: ' + error.message;
-                document.getElementById('analysisResult').style.color = 'red';
-                btn.disabled = false;
-                btn.textContent = '✅ AI로 확인하기';
-            }
-        };
-        reader.readAsDataURL(file);
-    });
+            };
+            reader.readAsDataURL(file);
+        });
 
-    setInterval(function() {
-        let now = getCurrentTime();
-        if (alarmTime !== '' && now === alarmTime) {
-            alarmTime = '';
-            document.getElementById('duoSection').style.display = 'block';
-        }
-    }, 1000);
+        setInterval(function() {
+            let now = getCurrentTime();
+            if (alarmTime !== '' && now === alarmTime) {
+                alarmTime = '';
+                document.getElementById('duoSection').style.display = 'block';
+            }
+        }, 1000);
     </script>
 </body>
 </html>
