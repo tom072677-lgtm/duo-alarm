@@ -272,6 +272,36 @@
         .d3 { -webkit-animation: dot-pulse 1.4s ease-in-out infinite 0.4s; animation: dot-pulse 1.4s ease-in-out infinite 0.4s; }
 
         input[type="file"] { margin: 8px 0; }
+
+        /* 소리 선택 */
+        .sound-label { color: #666; font-size: 13px; margin-bottom: 8px; text-align: left; font-weight: 600; }
+        .sound-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+        .sound-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 10px 4px;
+            text-align: center;
+            cursor: pointer;
+            background: white;
+            transition: all 0.15s;
+        }
+        .sound-card:hover { border-color: #58CC02; background: #f0f8e8; }
+        .sound-card.active { border-color: #58CC02; background: #f0f8e8; }
+        .sound-card .s-emoji { font-size: 20px; display: block; margin-bottom: 2px; }
+        .sound-card .s-name { font-size: 11px; color: #555; font-weight: 600; display: block; }
+        .sound-card.active .s-name { color: #58CC02; }
+        .preview-btn {
+            background: none; border: none; font-size: 10px; color: #aaa;
+            cursor: pointer; padding: 2px 4px; margin-top: 2px; display: block; width: 100%;
+        }
+        .preview-btn:hover { color: #58CC02; }
+        .noti-btn {
+            width: 100%; padding: 10px;
+            background: #f0f8e8; color: #58CC02;
+            border: 2px solid #58CC02; border-radius: 12px;
+            font-size: 14px; font-weight: 700; cursor: pointer;
+            margin-bottom: 12px; display: none;
+        }
     </style>
 </head>
 <body>
@@ -311,6 +341,9 @@
                 <button class="ampm-btn" id="btnPM" onclick="setAmpm('PM')">오후</button>
             </div>
         </div>
+        <button class="noti-btn" id="notiBtn">🔔 알림 권한 허용하기</button>
+        <p class="sound-label">알람 소리 선택</p>
+        <div class="sound-grid" id="soundGrid"></div>
         <button class="primary-btn" onclick="setAlarm()">알람 설정</button>
         <div id="timeLeft"></div>
         <div id="status">알람이 설정되지 않았습니다</div>
@@ -437,6 +470,7 @@
         if (!lang) showSection('langSection');
         else if (!name) showSection('nameSection');
         else showSection('mainSection');
+        checkNotifPermission();
     }
 
     // 올빼미 상태 변경
@@ -474,6 +508,163 @@
             owl.style.mixBlendMode = 'normal';
             owl.className = 'owl-img owl-floating';
         }
+    }
+
+    // ========== 알람 소리 ==========
+    const SOUNDS = [
+        { id: 'beep',   emoji: '📣', name: '삐삐',   interval: 800  },
+        { id: 'chime',  emoji: '🔔', name: '차임',   interval: 1500 },
+        { id: 'urgent', emoji: '🚨', name: '긴급',   interval: 900  },
+        { id: 'melody', emoji: '🎵', name: '멜로디', interval: 1200 },
+        { id: 'bird',   emoji: '🐦', name: '새소리', interval: 800  },
+        { id: 'none',   emoji: '🔕', name: '무음',   interval: 0    },
+    ];
+    let selectedSound = 'beep';
+    let alarmSoundTimer = null;
+    let audioCtx = null;
+
+    function getCtx() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return audioCtx;
+    }
+
+    function playSound(id) {
+        if (id === 'none') return;
+        try {
+            const ctx = getCtx(), t = ctx.currentTime;
+            switch(id) {
+                case 'beep': {
+                    const o = ctx.createOscillator(), g = ctx.createGain();
+                    o.connect(g); g.connect(ctx.destination);
+                    o.type = 'square'; o.frequency.value = 880;
+                    g.gain.setValueAtTime(0.3, t);
+                    g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+                    o.start(t); o.stop(t + 0.3); break;
+                }
+                case 'chime': {
+                    [523, 659, 784, 1047].forEach((f, i) => {
+                        const o = ctx.createOscillator(), g = ctx.createGain();
+                        o.connect(g); g.connect(ctx.destination);
+                        o.type = 'sine'; o.frequency.value = f;
+                        g.gain.setValueAtTime(0.35, t + i * 0.2);
+                        g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.2 + 0.5);
+                        o.start(t + i * 0.2); o.stop(t + i * 0.2 + 0.5);
+                    }); break;
+                }
+                case 'urgent': {
+                    const o = ctx.createOscillator(), g = ctx.createGain();
+                    o.connect(g); g.connect(ctx.destination);
+                    o.type = 'sawtooth';
+                    [440, 880, 440, 880].forEach((f, i) => o.frequency.setValueAtTime(f, t + i * 0.15));
+                    g.gain.setValueAtTime(0.3, t);
+                    g.gain.exponentialRampToValueAtTime(0.001, t + 0.65);
+                    o.start(t); o.stop(t + 0.65); break;
+                }
+                case 'melody': {
+                    [{f:523,d:0.15},{f:659,d:0.15},{f:784,d:0.15},{f:1047,d:0.4}].forEach(({f,d},i) => {
+                        const o = ctx.createOscillator(), g = ctx.createGain();
+                        o.connect(g); g.connect(ctx.destination);
+                        o.type = 'triangle'; o.frequency.value = f;
+                        const s = t + i * 0.15;
+                        g.gain.setValueAtTime(0.35, s);
+                        g.gain.exponentialRampToValueAtTime(0.001, s + d);
+                        o.start(s); o.stop(s + d);
+                    }); break;
+                }
+                case 'bird': {
+                    const o = ctx.createOscillator(), g = ctx.createGain();
+                    o.connect(g); g.connect(ctx.destination);
+                    o.type = 'sine';
+                    [1200, 2000, 1200, 2000, 1200].forEach((f, i) =>
+                        o.frequency.exponentialRampToValueAtTime(f, t + i * 0.1 + 0.01));
+                    g.gain.setValueAtTime(0.25, t);
+                    g.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+                    o.start(t); o.stop(t + 0.5); break;
+                }
+            }
+        } catch(e) {}
+    }
+
+    function startAlarmSound() {
+        playSound(selectedSound);
+        if (selectedSound !== 'none') {
+            const s = SOUNDS.find(s => s.id === selectedSound);
+            alarmSoundTimer = setInterval(() => playSound(selectedSound), s.interval);
+        }
+        if ('vibrate' in navigator) navigator.vibrate([600,300,600,300,600,300,600,300,600]);
+    }
+
+    function stopAlarmSound() {
+        if (alarmSoundTimer) { clearInterval(alarmSoundTimer); alarmSoundTimer = null; }
+        if ('vibrate' in navigator) navigator.vibrate(0);
+    }
+
+    function selectSound(id) {
+        selectedSound = id;
+        document.querySelectorAll('.sound-card').forEach(card => {
+            card.classList.toggle('active', card.dataset.id === id);
+        });
+        localStorage.setItem('selectedSound', id);
+    }
+
+    function previewSound(id, e) {
+        e.stopPropagation();
+        playSound(id);
+    }
+
+    function buildSoundGrid() {
+        const grid = document.getElementById('soundGrid');
+        const saved = localStorage.getItem('selectedSound');
+        if (saved) selectedSound = saved;
+        SOUNDS.forEach(s => {
+            const card = document.createElement('div');
+            card.className = 'sound-card' + (s.id === selectedSound ? ' active' : '');
+            card.dataset.id = s.id;
+            card.innerHTML = `
+                <span class="s-emoji">${s.emoji}</span>
+                <span class="s-name">${s.name}</span>
+                ${s.id !== 'none' ? `<button class="preview-btn" onclick="previewSound('${s.id}',event)">▶ 미리듣기</button>` : ''}
+            `;
+            card.addEventListener('click', () => selectSound(s.id));
+            grid.appendChild(card);
+        });
+    }
+
+    // ========== 알림 권한 ==========
+    function checkNotifPermission() {
+        if (!('Notification' in window)) return;
+        if (Notification.permission !== 'granted') {
+            document.getElementById('notiBtn').style.display = 'block';
+        }
+    }
+
+    document.getElementById('notiBtn').addEventListener('click', async () => {
+        const perm = await Notification.requestPermission();
+        if (perm === 'granted') document.getElementById('notiBtn').style.display = 'none';
+    });
+
+    // ========== Service Worker 통신 ==========
+    async function sendAlarmToSW(alarmTimeMs) {
+        if (!('serviceWorker' in navigator)) return;
+        const reg = await navigator.serviceWorker.ready;
+        if (reg.active) reg.active.postMessage({ type: 'SET_ALARM', alarmTime: alarmTimeMs });
+    }
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data.type === 'ALARM_FIRED') {
+                alarmTime = null;
+                startAlarmSound();
+                showSection('alarmSection');
+            }
+        });
+    }
+
+    if (new URLSearchParams(window.location.search).get('alarm') === 'true') {
+        history.replaceState({}, '', window.location.pathname);
+        startAlarmSound();
+        showSection('alarmSection');
     }
 
     // 스크롤 피커
@@ -541,6 +732,14 @@
         alarmTime.setHours(alarmH, m, 0, 0);
         if (alarmTime <= now) alarmTime.setDate(alarmTime.getDate() + 1);
 
+        sendAlarmToSW(alarmTime.getTime());
+
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().then(perm => {
+                if (perm === 'granted') document.getElementById('notiBtn').style.display = 'none';
+            });
+        }
+
         const diffMs = alarmTime - now;
         const diffH = Math.floor(diffMs / (1000*60*60));
         const diffM = Math.ceil((diffMs % (1000*60*60)) / (1000*60));
@@ -560,12 +759,14 @@
         const now = new Date();
         if (now >= alarmTime && now - alarmTime < 60000) {
             alarmTime = null;
+            startAlarmSound();
             showSection('alarmSection');
         }
     }, 1000);
 
     // 듀오링고 하러가기
     document.getElementById('goBtn').addEventListener('click', () => {
+        stopAlarmSound();
         window.open('duolingo://');
         document.getElementById('preview').style.display = 'none';
         document.getElementById('preview').src = '';
@@ -671,6 +872,7 @@
     // 피커 초기화
     buildCol(document.getElementById('hourCol'), hours, 8);
     buildCol(document.getElementById('minCol'), mins, 30);
+    buildSoundGrid();
 
     initApp();
 </script>
