@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>duo-alarm</title>
     <link rel="manifest" href="manifest.json">
 <script>
@@ -11,21 +12,25 @@
 </script>
     <style>
     body {
-        background-color: #f0f8e8;
-        font-family: 'Arial', sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-    }
-    #container {
-        background-color: white;
-        border-radius: 20px;
-        padding: 40px;
-        text-align: center;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        width: 350px;
+    background-color: #f0f8e8;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+#container {
+    background-color: white;
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 480px;
+    box-sizing: border-box;
+}
     }
     button {
         background-color: #58CC02;
