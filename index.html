@@ -31,8 +31,9 @@
         }
         h1 { color: #58CC02; font-size: 32px; margin-bottom: 8px; }
         h2 { color: #333; font-size: 20px; margin-bottom: 8px; }
-        p { color: #666; font-size: 14px; margin-bottom: 20px; }
+        p.sub { color: #666; font-size: 14px; margin-bottom: 20px; }
 
+        /* 언어 선택 버튼 */
         .lang-btn {
             display: block;
             width: 100%;
@@ -45,11 +46,9 @@
             cursor: pointer;
             text-align: left;
             color: #333;
+            transition: all 0.15s;
         }
-        .lang-btn:hover {
-            border-color: #58CC02;
-            background: #f0f8e8;
-        }
+        .lang-btn:hover { border-color: #58CC02; background: #f0f8e8; }
 
         input[type="text"] {
             width: 100%;
@@ -84,10 +83,12 @@
             font-weight: 700;
             cursor: pointer;
             margin-bottom: 8px;
+            transition: background 0.15s;
         }
         .primary-btn:hover { background: #46a302; }
         .primary-btn:disabled { background: #aaa; cursor: not-allowed; }
 
+        /* 스크롤 피커 */
         .picker-row {
             display: flex;
             justify-content: center;
@@ -119,12 +120,7 @@
         .scroll-item.selected { color: #58CC02; font-weight: 700; }
         .scroll-item.pad { color: transparent; }
         .sep { font-size: 28px; font-weight: 700; color: #58CC02; }
-        .ampm-col {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-left: 4px;
-        }
+        .ampm-col { display: flex; flex-direction: column; gap: 6px; margin-left: 4px; }
         .ampm-btn {
             padding: 10px 14px;
             border-radius: 10px;
@@ -134,12 +130,9 @@
             border: 2px solid #ddd;
             background: #f0f0f0;
             color: #aaa;
+            transition: all 0.15s;
         }
-        .ampm-btn.active {
-            background: #58CC02;
-            color: white;
-            border-color: #58CC02;
-        }
+        .ampm-btn.active { background: #58CC02; color: white; border-color: #58CC02; }
 
         #timeLeft { color: #58CC02; font-size: 14px; font-weight: 700; min-height: 20px; margin-bottom: 8px; }
         #status { color: #666; font-size: 14px; margin-bottom: 16px; }
@@ -157,19 +150,100 @@
             color: white;
         }
 
-        /* 업로드 섹션 */
-        #uploadSection input[type="file"] { margin: 8px 0; }
-        #preview {
-            max-width: 120px;
-            max-height: 120px;
-            object-fit: cover;
-            margin: 8px auto;
-            border-radius: 8px;
-            display: none;
+        /* 올빼미 애니메이션 */
+        .owl-wrap {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 16px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        #analysisResult { margin-top: 12px; font-size: 16px; font-weight: bold; }
-        #cheerMsg { margin-top: 12px; font-size: 20px; font-weight: bold; color: #58CC02; display: none; }
-        #confirmBtn { display: none; margin-top: 16px; }
+        .owl-img {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            transition: opacity 0.4s;
+        }
+        .bubble {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #f5f5f5;
+            border: 2px solid #ddd;
+            border-radius: 16px;
+            padding: 8px 12px;
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .bubble.show { opacity: 1; }
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: #58CC02;
+            border-radius: 50%;
+        }
+        .star-wrap {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .star-wrap.show { opacity: 1; }
+
+        /* 메시지 박스 */
+        .result-msg {
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.5s, transform 0.5s;
+            margin-bottom: 16px;
+        }
+        .result-msg.show { opacity: 1; transform: translateY(0); }
+
+        /* 애니메이션 */
+        @keyframes think {
+            0%, 100% { transform: rotate(-8deg) translateY(0); }
+            50% { transform: rotate(8deg) translateY(-4px); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
+        }
+        @keyframes jump {
+            0%, 100% { transform: translateY(0) scale(1); }
+            30% { transform: translateY(-24px) scale(1.1); }
+            60% { transform: translateY(-8px) scale(1.05); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        @keyframes dot-pulse {
+            0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+            40% { opacity: 1; transform: scale(1.2); }
+        }
+        @keyframes star-pop {
+            0% { transform: scale(0) rotate(0deg); opacity: 1; }
+            100% { transform: scale(1.5) rotate(180deg); opacity: 0; }
+        }
+
+        .owl-thinking { animation: think 1s ease-in-out infinite; }
+        .owl-shaking { animation: shake 0.5s ease-in-out 2; }
+        .owl-jumping { animation: jump 0.6s ease-in-out 3; }
+        .owl-floating { animation: float 2s ease-in-out infinite; }
+        .d1 { animation: dot-pulse 1.4s ease-in-out infinite 0s; }
+        .d2 { animation: dot-pulse 1.4s ease-in-out infinite 0.2s; }
+        .d3 { animation: dot-pulse 1.4s ease-in-out infinite 0.4s; }
+
+        input[type="file"] { margin: 8px 0; }
     </style>
 </head>
 <body>
@@ -180,7 +254,7 @@
     <div id="langSection" style="display:none;">
         <h1>duo-alarm ⏰</h1>
         <h2>어떤 언어를 공부하고 있나요?</h2>
-        <p>듀오링고에서 배우는 언어를 선택해주세요!</p>
+        <p class="sub">듀오링고에서 배우는 언어를 선택해주세요!</p>
         <button class="lang-btn" onclick="selectLang('english')">🇺🇸 영어</button>
         <button class="lang-btn" onclick="selectLang('japanese')">🇯🇵 일본어</button>
         <button class="lang-btn" onclick="selectLang('spanish')">🇪🇸 스페인어</button>
@@ -190,16 +264,16 @@
     <div id="nameSection" style="display:none;">
         <h1>duo-alarm ⏰</h1>
         <h2 id="nameTitle"></h2>
-        <p id="nameDesc"></p>
+        <p class="sub" id="nameDesc"></p>
         <div class="hint" id="nameHint"></div>
         <input type="text" id="nameInput" placeholder="">
         <button class="primary-btn" id="saveNameBtn">시작하기 →</button>
     </div>
 
-    <!-- 메인: 시간 설정 화면 -->
+    <!-- 메인: 시간 설정 -->
     <div id="mainSection" style="display:none;">
         <h1>duo-alarm ⏰</h1>
-        <p>알람 시간을 설정하세요</p>
+        <p class="sub">알람 시간을 설정하세요</p>
         <div class="picker-row">
             <div class="scroll-col" id="hourCol"></div>
             <div class="sep">:</div>
@@ -214,23 +288,51 @@
         <div id="status">알람이 설정되지 않았습니다</div>
     </div>
 
-    <!-- 알람 화면: 듀오링고 하러가기 -->
+    <!-- 알람 화면 -->
     <div id="alarmSection" style="display:none;">
         <h1>⏰ 알람!</h1>
-        <p style="font-size:16px; margin-bottom:24px;">듀오링고를 완료하고 알람을 꺼주세요!</p>
+        <p class="sub" style="font-size:16px; margin-bottom:24px;">듀오링고를 완료하고 알람을 꺼주세요!</p>
         <button class="primary-btn" id="goBtn">🦜 듀오링고 하고 알람 끄기</button>
     </div>
 
-    <!-- 업로드 화면 -->
+    <!-- 업로드 + 분석 화면 -->
     <div id="uploadSection" style="display:none;">
         <h1>duo-alarm ⏰</h1>
-        <p>듀오링고 완료 화면 스크린샷을 업로드해주세요!</p>
-        <img id="preview" src="" alt="미리보기">
-        <input type="file" id="screenshotInput" accept="image/*">
-        <button class="primary-btn" id="analyzeBtn">✅ AI로 확인하기</button>
-        <p id="analysisResult"></p>
-        <p id="cheerMsg"></p>
-        <button class="primary-btn" id="confirmBtn">확인</button>
+        <p class="sub" id="uploadMsg">듀오링고 완료 화면 스크린샷을 업로드해주세요!</p>
+
+        <!-- 올빼미 캐릭터 -->
+        <div class="owl-wrap">
+            <div class="bubble" id="bubble">
+                <span class="dot d1"></span>
+                <span class="dot d2"></span>
+                <span class="dot d3"></span>
+            </div>
+            <div class="star-wrap" id="stars">
+                <svg width="180" height="180" viewBox="0 0 180 180">
+                    <polygon points="20,20 23,30 33,30 25,36 28,46 20,40 12,46 15,36 7,30 17,30" fill="#FFD700" style="animation:star-pop 1s ease-out forwards 0.2s; transform-origin:20px 33px; opacity:0;"/>
+                    <polygon points="155,15 158,25 168,25 160,31 163,41 155,35 147,41 150,31 142,25 152,25" fill="#FF6B35" style="animation:star-pop 1s ease-out forwards 0.4s; transform-origin:155px 28px; opacity:0;"/>
+                    <polygon points="90,5 93,15 103,15 95,21 98,31 90,25 82,31 85,21 77,15 87,15" fill="#58CC02" style="animation:star-pop 1s ease-out forwards 0.1s; transform-origin:90px 18px; opacity:0;"/>
+                    <circle cx="15" cy="100" r="5" fill="#1CB0F6" style="animation:star-pop 0.8s ease-out forwards 0.3s; transform-origin:15px 100px; opacity:0;"/>
+                    <circle cx="165" cy="120" r="4" fill="#FFD700" style="animation:star-pop 0.8s ease-out forwards 0.5s; transform-origin:165px 120px; opacity:0;"/>
+                    <circle cx="40" cy="155" r="4" fill="#FF6B35" style="animation:star-pop 0.8s ease-out forwards 0.2s; transform-origin:40px 155px; opacity:0;"/>
+                    <circle cx="140" cy="150" r="5" fill="#58CC02" style="animation:star-pop 0.8s ease-out forwards 0.4s; transform-origin:140px 150px; opacity:0;"/>
+                </svg>
+            </div>
+            <img id="owlImg" class="owl-img owl-floating" src="duo-happy.jpg" alt="duo">
+        </div>
+
+        <!-- 파일 업로드 -->
+        <div id="uploadControls">
+            <img id="preview" style="max-width:120px; max-height:120px; object-fit:cover; border-radius:8px; display:none; margin:8px auto;">
+            <input type="file" id="screenshotInput" accept="image/*">
+            <button class="primary-btn" id="analyzeBtn">✅ AI로 확인하기</button>
+        </div>
+
+        <!-- 결과 메시지 -->
+        <div class="result-msg" id="resultMsg"></div>
+
+        <!-- 확인 버튼 (성공 후) -->
+        <button class="primary-btn" id="confirmBtn" style="display:none; background:#1CB0F6;">확인</button>
     </div>
 </div>
 
@@ -295,7 +397,7 @@
     });
 
     function showSection(id) {
-        ['langSection', 'nameSection', 'mainSection', 'alarmSection', 'uploadSection'].forEach(s => {
+        ['langSection','nameSection','mainSection','alarmSection','uploadSection'].forEach(s => {
             document.getElementById(s).style.display = 'none';
         });
         document.getElementById(id).style.display = 'block';
@@ -304,12 +406,45 @@
     function initApp() {
         const name = localStorage.getItem('userName');
         const lang = localStorage.getItem('userLanguage');
-        if (!lang) {
-            showSection('langSection');
-        } else if (!name) {
-            showSection('nameSection');
+        if (!lang) showSection('langSection');
+        else if (!name) showSection('nameSection');
+        else showSection('mainSection');
+    }
+
+    // 올빼미 상태 변경
+    function setOwl(state) {
+        const owl = document.getElementById('owlImg');
+        const bubble = document.getElementById('bubble');
+        const stars = document.getElementById('stars');
+
+        owl.className = 'owl-img';
+        bubble.className = 'bubble';
+        stars.className = 'star-wrap';
+
+        if (state === 'thinking') {
+            owl.src = 'duo-think.jpeg';
+            owl.style.mixBlendMode = 'multiply';
+            owl.className = 'owl-img owl-thinking';
+            bubble.className = 'bubble show';
+        } else if (state === 'happy') {
+            owl.src = 'duo-happy.jpg';
+            owl.style.mixBlendMode = 'normal';
+            owl.className = 'owl-img owl-jumping';
+            stars.className = 'star-wrap show';
+            setTimeout(() => {
+                owl.className = 'owl-img owl-floating';
+            }, 1800);
+        } else if (state === 'sad') {
+            owl.src = 'duo-sad.webp';
+            owl.style.mixBlendMode = 'normal';
+            owl.className = 'owl-img owl-shaking';
+            setTimeout(() => {
+                owl.className = 'owl-img owl-floating';
+            }, 1000);
         } else {
-            showSection('mainSection');
+            owl.src = 'duo-happy.jpg';
+            owl.style.mixBlendMode = 'normal';
+            owl.className = 'owl-img owl-floating';
         }
     }
 
@@ -344,7 +479,6 @@
             colEl.scrollTop = idx * 40;
             updateSelected(colEl);
         }, 50);
-
         colEl.addEventListener('scroll', () => updateSelected(colEl));
     }
 
@@ -402,28 +536,30 @@
         }
     }, 1000);
 
-    // 듀오링고 하러가기 버튼
-    document.getElementById('goBtn').addEventListener('click', function() {
+    // 듀오링고 하러가기
+    document.getElementById('goBtn').addEventListener('click', () => {
         window.open('duolingo://');
-        // 업로드 화면 초기화
         document.getElementById('preview').style.display = 'none';
         document.getElementById('preview').src = '';
         document.getElementById('screenshotInput').value = '';
-        document.getElementById('analysisResult').textContent = '';
-        document.getElementById('cheerMsg').style.display = 'none';
+        document.getElementById('resultMsg').className = 'result-msg';
+        document.getElementById('resultMsg').innerHTML = '';
         document.getElementById('confirmBtn').style.display = 'none';
         document.getElementById('analyzeBtn').disabled = false;
         document.getElementById('analyzeBtn').textContent = '✅ AI로 확인하기';
+        document.getElementById('uploadMsg').textContent = '듀오링고 완료 화면 스크린샷을 업로드해주세요!';
+        document.getElementById('uploadControls').style.display = 'block';
+        setOwl('idle');
         showSection('uploadSection');
     });
 
     // 이미지 미리보기
     document.getElementById('screenshotInput').addEventListener('change', function() {
-        let file = this.files[0];
+        const file = this.files[0];
         if (file) {
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                let preview = document.getElementById('preview');
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.getElementById('preview');
                 preview.src = e.target.result;
                 preview.style.display = 'block';
             };
@@ -433,54 +569,65 @@
 
     // AI 분석
     document.getElementById('analyzeBtn').addEventListener('click', async function() {
-        let file = document.getElementById('screenshotInput').files[0];
+        const file = document.getElementById('screenshotInput').files[0];
         if (!file) {
-            document.getElementById('analysisResult').textContent = '스크린샷을 먼저 업로드해주세요!';
-            document.getElementById('analysisResult').style.color = 'red';
+            document.getElementById('uploadMsg').textContent = '스크린샷을 먼저 업로드해주세요!';
             return;
         }
-        let btn = document.getElementById('analyzeBtn');
+
+        const btn = document.getElementById('analyzeBtn');
         btn.disabled = true;
         btn.textContent = '분석 중...';
-        document.getElementById('analysisResult').textContent = '';
-        document.getElementById('cheerMsg').style.display = 'none';
+        document.getElementById('uploadMsg').textContent = '분석 중이에요...';
+        document.getElementById('resultMsg').className = 'result-msg';
+        document.getElementById('resultMsg').innerHTML = '';
         document.getElementById('confirmBtn').style.display = 'none';
 
-        let reader = new FileReader();
-        reader.onload = async function(e) {
-            let base64 = e.target.result.split(',')[1];
-            let mediaType = file.type;
+        setOwl('thinking');
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const base64 = e.target.result.split(',')[1];
+            const mediaType = file.type;
             try {
-                let response = await fetch('/.netlify/functions/analyze', {
+                const response = await fetch('/.netlify/functions/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ imageData: base64, mediaType: mediaType })
+                    body: JSON.stringify({ imageData: base64, mediaType })
                 });
-                let data = await response.json();
-                if (!data.content || !data.content[0]) throw new Error('API 응답 오류: ' + JSON.stringify(data));
-                let result = data.content[0].text.trim().toUpperCase();
+                const data = await response.json();
+                if (!data.content || !data.content[0]) throw new Error('API 응답 오류');
+                const result = data.content[0].text.trim().toUpperCase();
 
                 btn.textContent = '✅ 분석 완료';
 
                 if (result.includes('YES')) {
                     const name = localStorage.getItem('userName') || '';
                     const lang = localStorage.getItem('userLanguage') || 'english';
-                    const config = langConfig[lang];
-                    document.getElementById('analysisResult').textContent = '✅ 학습을 확인했어요!';
-                    document.getElementById('analysisResult').style.color = 'green';
-                    const cheerEl = document.getElementById('cheerMsg');
-                    cheerEl.textContent = config.cheerMsg(name);
-                    cheerEl.style.display = 'block';
-                    document.getElementById('confirmBtn').style.display = 'block';
+                    const cheer = langConfig[lang].cheerMsg(name);
+
+                    setOwl('happy');
+                    document.getElementById('uploadMsg').textContent = '';
+                    document.getElementById('uploadControls').style.display = 'none';
+
+                    setTimeout(() => {
+                        document.getElementById('resultMsg').innerHTML = `
+                            <p style="font-size:18px; font-weight:700; color:#58CC02; margin-bottom:8px;">✅ 학습을 확인했어요!</p>
+                            <p style="font-size:22px; font-weight:700; color:#333;">${cheer}</p>
+                        `;
+                        document.getElementById('resultMsg').className = 'result-msg show';
+                        document.getElementById('confirmBtn').style.display = 'block';
+                    }, 800);
+
                 } else {
-                    document.getElementById('analysisResult').textContent = '❌ 듀오링고 완료 화면이 아니에요. 다시 시도해주세요!';
-                    document.getElementById('analysisResult').style.color = 'red';
+                    setOwl('sad');
+                    document.getElementById('uploadMsg').textContent = '듀오링고 완료 화면이 아니에요. 다시 시도해주세요!';
                     btn.disabled = false;
                     btn.textContent = '✅ AI로 확인하기';
                 }
             } catch (error) {
-                document.getElementById('analysisResult').textContent = '오류가 발생했어요: ' + error.message;
-                document.getElementById('analysisResult').style.color = 'red';
+                setOwl('sad');
+                document.getElementById('uploadMsg').textContent = '오류가 발생했어요: ' + error.message;
                 btn.disabled = false;
                 btn.textContent = '✅ AI로 확인하기';
             }
@@ -488,7 +635,7 @@
         reader.readAsDataURL(file);
     });
 
-    // 확인 버튼 → 시간 설정 화면으로
+    // 확인 버튼 → 메인으로
     document.getElementById('confirmBtn').addEventListener('click', () => {
         showSection('mainSection');
     });
