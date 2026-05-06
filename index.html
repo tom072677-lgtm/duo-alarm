@@ -30,7 +30,69 @@
             max-width: 480px;
         }
         h1 { color: #58CC02; font-size: 32px; margin-bottom: 8px; }
+        h2 { color: #333; font-size: 20px; margin-bottom: 8px; }
         p { color: #666; font-size: 14px; margin-bottom: 20px; }
+
+        .lang-btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            font-size: 18px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.15s;
+            color: #333;
+        }
+        .lang-btn:hover {
+            border-color: #58CC02;
+            background: #f0f8e8;
+        }
+        .lang-btn.selected {
+            border-color: #58CC02;
+            background: #f0f8e8;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #58CC02;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        input[type="text"]:focus { outline: none; }
+
+        .hint {
+            background: #fff8e1;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .primary-btn {
+            width: 100%;
+            padding: 14px;
+            background: #58CC02;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+        .primary-btn:hover { background: #46a302; }
+        .primary-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+        /* 스크롤 피커 */
         .picker-row {
             display: flex;
             justify-content: center;
@@ -77,13 +139,13 @@
             border: 2px solid #ddd;
             background: #f0f0f0;
             color: #aaa;
-            transition: all 0.15s;
         }
         .ampm-btn.active {
             background: #58CC02;
             color: white;
             border-color: #58CC02;
         }
+
         button {
             background-color: #58CC02;
             color: white;
@@ -96,321 +158,324 @@
         }
         button:hover { background-color: #46a302; }
         button:disabled { background-color: #aaa; cursor: not-allowed; }
-        #setBtn {
-            width: 100%;
-            padding: 14px;
-            margin: 0 0 8px 0;
-        }
-        #timeLeft {
-            color: #58CC02;
-            font-size: 14px;
-            font-weight: 700;
-            min-height: 20px;
-            margin-bottom: 8px;
-        }
+
+        #timeLeft { color: #58CC02; font-size: 14px; font-weight: 700; min-height: 20px; margin-bottom: 8px; }
         #status { color: #666; font-size: 14px; margin-bottom: 16px; }
         #uploadSection { display: none; margin-top: 16px; }
         #uploadSection input[type="file"] { margin: 8px 0; }
         #analysisResult { margin-top: 12px; font-size: 16px; font-weight: bold; }
         #cheerMsg { margin-top: 8px; font-size: 18px; font-weight: bold; color: #58CC02; display: none; }
         #preview { max-width: 200px; margin: 8px auto; border-radius: 8px; display: none; }
-        #installBtn { display: none; background-color: #1CB0F6; width: 100%; margin-bottom: 16px; }
-
-        /* 이름 입력 화면 */
-        #nameSection {
-            display: none;
-        }
-        #nameSection h2 {
-            color: #58CC02;
-            font-size: 22px;
-            margin-bottom: 12px;
-        }
-        #nameSection p {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 16px;
-        }
-        #nameInput {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid #58CC02;
-            border-radius: 12px;
-            font-size: 16px;
-            margin-bottom: 12px;
-            text-align: center;
-        }
-        #nameInput:focus { outline: none; }
-        #saveNameBtn {
-            width: 100%;
-            padding: 14px;
-            margin: 0;
-        }
+        #installBtn { display: none; background-color: #1CB0F6; width: 100%; margin-bottom: 16px; border: none; border-radius: 12px; padding: 12px; font-size: 16px; cursor: pointer; color: white; }
     </style>
 </head>
 <body>
-    <div id="container">
-        <button id="installBtn">📲 앱으로 설치하기</button>
+<div id="container">
+    <button id="installBtn">📲 앱으로 설치하기</button>
 
-        <!-- 이름 입력 화면 -->
-        <div id="nameSection">
-            <h1>duo-alarm ⏰</h1>
-            <h2>처음 오셨군요!</h2>
-            <p>이름을 입력해주세요 😊</p>
-            <input type="text" id="nameInput" placeholder="이름 입력 (예: 윤수)">
-            <button id="saveNameBtn">시작하기</button>
-        </div>
-
-        <!-- 메인 화면 -->
-        <div id="mainSection" style="display:none;">
-            <h1>duo-alarm ⏰</h1>
-            <p>알람 시간을 설정하세요</p>
-
-            <div class="picker-row">
-                <div class="scroll-col" id="hourCol"></div>
-                <div class="sep">:</div>
-                <div class="scroll-col" id="minCol"></div>
-                <div class="ampm-col">
-                    <button class="ampm-btn active" id="btnAM" onclick="setAmpm('AM')">오전</button>
-                    <button class="ampm-btn" id="btnPM" onclick="setAmpm('PM')">오후</button>
-                </div>
-            </div>
-
-            <button id="setBtn" onclick="setAlarm()">알람 설정</button>
-            <div id="timeLeft"></div>
-            <div id="status">알람이 설정되지 않았습니다</div>
-
-            <div id="duoSection" style="display:none;">
-                <button id="goBtn">🦜 듀오링고 하러가기</button>
-            </div>
-
-            <div id="uploadSection">
-                <p>듀오링고 완료 화면 스크린샷을 업로드해주세요!</p>
-                <img id="preview" src="" alt="미리보기">
-                <input type="file" id="screenshotInput" accept="image/*">
-                <button id="analyzeBtn">✅ AI로 확인하기</button>
-                <p id="analysisResult"></p>
-                <p id="cheerMsg"></p>
-            </div>
-        </div>
+    <!-- 1단계: 언어 선택 -->
+    <div id="langSection" style="display:none;">
+        <h1>duo-alarm ⏰</h1>
+        <h2>어떤 언어를 공부하고 있나요?</h2>
+        <p>듀오링고에서 배우는 언어를 선택해주세요!</p>
+        <button class="lang-btn" onclick="selectLang('english')">🇺🇸 영어</button>
+        <button class="lang-btn" onclick="selectLang('japanese')">🇯🇵 일본어</button>
+        <button class="lang-btn" onclick="selectLang('spanish')">🇪🇸 스페인어</button>
     </div>
 
-    <script>
-        // PWA 설치
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('installBtn').style.display = 'block';
+    <!-- 2단계: 이름 입력 -->
+    <div id="nameSection" style="display:none;">
+        <h1>duo-alarm ⏰</h1>
+        <h2 id="nameTitle"></h2>
+        <p id="nameDesc"></p>
+        <div class="hint" id="nameHint"></div>
+        <input type="text" id="nameInput" placeholder="">
+        <button class="primary-btn" id="saveNameBtn">다음 →</button>
+    </div>
+
+    <!-- 메인 화면 -->
+    <div id="mainSection" style="display:none;">
+        <h1>duo-alarm ⏰</h1>
+        <p>알람 시간을 설정하세요</p>
+
+        <div class="picker-row">
+            <div class="scroll-col" id="hourCol"></div>
+            <div class="sep">:</div>
+            <div class="scroll-col" id="minCol"></div>
+            <div class="ampm-col">
+                <button class="ampm-btn active" id="btnAM" onclick="setAmpm('AM')">오전</button>
+                <button class="ampm-btn" id="btnPM" onclick="setAmpm('PM')">오후</button>
+            </div>
+        </div>
+
+        <button class="primary-btn" onclick="setAlarm()">알람 설정</button>
+        <div id="timeLeft"></div>
+        <div id="status">알람이 설정되지 않았습니다</div>
+
+        <div id="duoSection" style="display:none;">
+            <button id="goBtn">🦜 듀오링고 하러가기</button>
+        </div>
+
+        <div id="uploadSection">
+            <p>듀오링고 완료 화면 스크린샷을 업로드해주세요!</p>
+            <img id="preview" src="" alt="미리보기">
+            <input type="file" id="screenshotInput" accept="image/*">
+            <button id="analyzeBtn">✅ AI로 확인하기</button>
+            <p id="analysisResult"></p>
+            <p id="cheerMsg"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // PWA 설치
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('installBtn').style.display = 'block';
+    });
+    document.getElementById('installBtn').addEventListener('click', async () => {
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        document.getElementById('installBtn').style.display = 'none';
+    });
+
+    // 언어별 설정
+    const langConfig = {
+        english: {
+            nameTitle: '영어 이름을 알려주세요!',
+            nameDesc: '듀오링고에서 사용하는 영어 이름을 입력해주세요.',
+            nameHint: '💡 예시: David, Emma, John',
+            placeholder: 'e.g. David',
+            cheerMsg: (name) => `${name}, Good luck today! 🎉`
+        },
+        japanese: {
+            nameTitle: '일본어 이름을 알려주세요!',
+            nameDesc: '카타카나나 히라가나로 이름을 입력해주세요.',
+            nameHint: '💡 예시: タナカ, はなこ\n일본어 키보드가 없으면:\n설정 → 일반 → 키보드 → 키보드 추가 → 일본어',
+            placeholder: 'e.g. タナカ',
+            cheerMsg: (name) => `${name}さん、今日も頑張って！🎉`
+        },
+        spanish: {
+            nameTitle: '스페인어 이름을 알려주세요!',
+            nameDesc: '스페인어 이름을 입력해주세요.',
+            nameHint: '💡 예시: Carlos, María, José',
+            placeholder: 'e.g. Carlos',
+            cheerMsg: (name) => `¡${name}, Buena suerte hoy! 🎉`
+        }
+    };
+
+    let selectedLang = '';
+
+    function selectLang(lang) {
+        selectedLang = lang;
+        const config = langConfig[lang];
+
+        document.getElementById('nameTitle').textContent = config.nameTitle;
+        document.getElementById('nameDesc').textContent = config.nameDesc;
+        document.getElementById('nameHint').innerText = config.nameHint;
+        document.getElementById('nameInput').placeholder = config.placeholder;
+
+        showSection('nameSection');
+    }
+
+    document.getElementById('saveNameBtn').addEventListener('click', () => {
+        const name = document.getElementById('nameInput').value.trim();
+        if (!name) {
+            alert('이름을 입력해주세요!');
+            return;
+        }
+        localStorage.setItem('userName', name);
+        localStorage.setItem('userLanguage', selectedLang);
+        initApp();
+    });
+
+    function showSection(id) {
+        ['langSection', 'nameSection', 'mainSection'].forEach(s => {
+            document.getElementById(s).style.display = 'none';
         });
-        document.getElementById('installBtn').addEventListener('click', async () => {
-            deferredPrompt.prompt();
-            await deferredPrompt.userChoice;
-            deferredPrompt = null;
-            document.getElementById('installBtn').style.display = 'none';
+        document.getElementById(id).style.display = 'block';
+    }
+
+    function initApp() {
+        const name = localStorage.getItem('userName');
+        const lang = localStorage.getItem('userLanguage');
+        if (name && lang) {
+            showSection('mainSection');
+        } else if (!lang) {
+            showSection('langSection');
+        } else {
+            showSection('nameSection');
+        }
+    }
+
+    // 스크롤 피커
+    const hours = [1,2,3,4,5,6,7,8,9,10,11,12];
+    const mins = Array.from({length:60}, (_,i) => i);
+    let ampm = 'AM';
+    let alarmTime = null;
+
+    function pad(n) { return String(n).padStart(2,'0'); }
+
+    function buildCol(colEl, items, defaultVal) {
+        colEl.innerHTML = '';
+        const padTop = document.createElement('div');
+        padTop.className = 'scroll-item pad';
+        padTop.textContent = '-';
+        colEl.appendChild(padTop);
+        items.forEach(val => {
+            const div = document.createElement('div');
+            div.className = 'scroll-item';
+            div.textContent = pad(val);
+            div.dataset.val = val;
+            colEl.appendChild(div);
         });
+        const padBot = document.createElement('div');
+        padBot.className = 'scroll-item pad';
+        padBot.textContent = '-';
+        colEl.appendChild(padBot);
 
-        // 받침 유무로 아/야 구분
-        function getJosa(name) {
-            const lastChar = name[name.length - 1];
-            const code = lastChar.charCodeAt(0);
-            const base = code - 0xAC00;
-            const jongseong = base % 28;
-            return jongseong === 0 ? '야' : '아';
-        }
+        const idx = items.indexOf(defaultVal);
+        setTimeout(() => {
+            colEl.scrollTop = idx * 40;
+            updateSelected(colEl);
+        }, 50);
 
-        // 이름 확인 후 화면 전환
-        function initApp() {
-            const name = localStorage.getItem('userName');
-            if (name) {
-                document.getElementById('nameSection').style.display = 'none';
-                document.getElementById('mainSection').style.display = 'block';
-            } else {
-                document.getElementById('nameSection').style.display = 'block';
-                document.getElementById('mainSection').style.display = 'none';
-            }
-        }
+        colEl.addEventListener('scroll', () => updateSelected(colEl));
+    }
 
-        // 이름 저장
-        document.getElementById('saveNameBtn').addEventListener('click', () => {
-            const name = document.getElementById('nameInput').value.trim();
-            if (!name) {
-                alert('이름을 입력해주세요!');
-                return;
-            }
-            localStorage.setItem('userName', name);
-            initApp();
+    function updateSelected(colEl) {
+        const idx = Math.round(colEl.scrollTop / 40);
+        colEl.querySelectorAll('[data-val]').forEach((el, i) => {
+            el.classList.toggle('selected', i === idx);
         });
+    }
 
-        // 스크롤 피커
-        const hours = [1,2,3,4,5,6,7,8,9,10,11,12];
-        const mins = Array.from({length:60}, (_,i) => i);
-        let ampm = 'AM';
-        let alarmTime = null;
+    function getVal(colEl) {
+        const idx = Math.round(colEl.scrollTop / 40);
+        const items = colEl.querySelectorAll('[data-val]');
+        return parseInt(items[idx]?.dataset.val ?? 0);
+    }
 
-        function pad(n) { return String(n).padStart(2,'0'); }
+    function setAmpm(val) {
+        ampm = val;
+        document.getElementById('btnAM').className = 'ampm-btn' + (val === 'AM' ? ' active' : '');
+        document.getElementById('btnPM').className = 'ampm-btn' + (val === 'PM' ? ' active' : '');
+    }
 
-        function buildCol(colEl, items, defaultVal) {
-            colEl.innerHTML = '';
-            const padTop = document.createElement('div');
-            padTop.className = 'scroll-item pad';
-            padTop.textContent = '-';
-            colEl.appendChild(padTop);
-            items.forEach(val => {
-                const div = document.createElement('div');
-                div.className = 'scroll-item';
-                div.textContent = pad(val);
-                div.dataset.val = val;
-                colEl.appendChild(div);
-            });
-            const padBot = document.createElement('div');
-            padBot.className = 'scroll-item pad';
-            padBot.textContent = '-';
-            colEl.appendChild(padBot);
+    function setAlarm() {
+        const h = getVal(document.getElementById('hourCol'));
+        const m = getVal(document.getElementById('minCol'));
+        const now = new Date();
+        let alarmH = h;
+        if (ampm === 'PM' && h !== 12) alarmH += 12;
+        if (ampm === 'AM' && h === 12) alarmH = 0;
 
-            const idx = items.indexOf(defaultVal);
-            setTimeout(() => {
-                colEl.scrollTop = idx * 40;
-                updateSelected(colEl);
-            }, 50);
+        alarmTime = new Date();
+        alarmTime.setHours(alarmH, m, 0, 0);
+        if (alarmTime <= now) alarmTime.setDate(alarmTime.getDate() + 1);
 
-            colEl.addEventListener('scroll', () => updateSelected(colEl));
+        const diffMs = alarmTime - now;
+        const diffH = Math.floor(diffMs / (1000*60*60));
+        const diffM = Math.ceil((diffMs % (1000*60*60)) / (1000*60));
+
+        let msg = '';
+        if (diffH > 0 && diffM > 0) msg = `${diffH}시간 ${diffM}분 뒤 알람이 울립니다`;
+        else if (diffH > 0) msg = `${diffH}시간 뒤 알람이 울립니다`;
+        else msg = `${diffM}분 뒤 알람이 울립니다`;
+
+        document.getElementById('timeLeft').textContent = msg;
+        document.getElementById('status').textContent = `${ampm === 'AM' ? '오전' : '오후'} ${pad(h)}:${pad(m)} 알람 설정됨`;
+    }
+
+    // 알람 체크
+    setInterval(() => {
+        if (!alarmTime) return;
+        const now = new Date();
+        if (now >= alarmTime && now - alarmTime < 60000) {
+            alarmTime = null;
+            document.getElementById('timeLeft').textContent = '';
+            document.getElementById('status').textContent = '알람이 울립니다!';
+            document.getElementById('duoSection').style.display = 'block';
         }
+    }, 1000);
 
-        function updateSelected(colEl) {
-            const idx = Math.round(colEl.scrollTop / 40);
-            colEl.querySelectorAll('[data-val]').forEach((el, i) => {
-                el.classList.toggle('selected', i === idx);
-            });
-        }
+    document.getElementById('goBtn').addEventListener('click', function() {
+        window.open('duolingo://');
+        document.getElementById('duoSection').style.display = 'none';
+        document.getElementById('uploadSection').style.display = 'block';
+    });
 
-        function getVal(colEl) {
-            const idx = Math.round(colEl.scrollTop / 40);
-            const items = colEl.querySelectorAll('[data-val]');
-            return parseInt(items[idx]?.dataset.val ?? 0);
-        }
-
-        function setAmpm(val) {
-            ampm = val;
-            document.getElementById('btnAM').className = 'ampm-btn' + (val === 'AM' ? ' active' : '');
-            document.getElementById('btnPM').className = 'ampm-btn' + (val === 'PM' ? ' active' : '');
-        }
-
-        function setAlarm() {
-            const h = getVal(document.getElementById('hourCol'));
-            const m = getVal(document.getElementById('minCol'));
-            const now = new Date();
-            let alarmH = h;
-            if (ampm === 'PM' && h !== 12) alarmH += 12;
-            if (ampm === 'AM' && h === 12) alarmH = 0;
-
-            alarmTime = new Date();
-            alarmTime.setHours(alarmH, m, 0, 0);
-            if (alarmTime <= now) alarmTime.setDate(alarmTime.getDate() + 1);
-
-            const diffMs = alarmTime - now;
-            const diffH = Math.floor(diffMs / (1000*60*60));
-            const diffM = Math.ceil((diffMs % (1000*60*60)) / (1000*60));
-
-            let msg = '';
-            if (diffH > 0 && diffM > 0) msg = `${diffH}시간 ${diffM}분 뒤 알람이 울립니다`;
-            else if (diffH > 0) msg = `${diffH}시간 뒤 알람이 울립니다`;
-            else msg = `${diffM}분 뒤 알람이 울립니다`;
-
-            document.getElementById('timeLeft').textContent = msg;
-            document.getElementById('status').textContent = `${ampm === 'AM' ? '오전' : '오후'} ${pad(h)}:${pad(m)} 알람 설정됨`;
-        }
-
-        // 알람 체크
-        setInterval(() => {
-            if (!alarmTime) return;
-            const now = new Date();
-            if (now >= alarmTime && now - alarmTime < 60000) {
-                alarmTime = null;
-                document.getElementById('timeLeft').textContent = '';
-                document.getElementById('status').textContent = '알람이 울립니다!';
-                document.getElementById('duoSection').style.display = 'block';
-            }
-        }, 1000);
-
-        // 듀오링고 버튼
-        document.getElementById('goBtn').addEventListener('click', function() {
-            window.open('duolingo://');
-            document.getElementById('duoSection').style.display = 'none';
-            document.getElementById('uploadSection').style.display = 'block';
-        });
-
-        // 이미지 미리보기
-        document.getElementById('screenshotInput').addEventListener('change', function() {
-            let file = this.files[0];
-            if (file) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    let preview = document.getElementById('preview');
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // AI 분석
-        document.getElementById('analyzeBtn').addEventListener('click', async function() {
-            let file = document.getElementById('screenshotInput').files[0];
-            if (!file) {
-                document.getElementById('analysisResult').textContent = '스크린샷을 먼저 업로드해주세요!';
-                document.getElementById('analysisResult').style.color = 'red';
-                return;
-            }
-            let btn = document.getElementById('analyzeBtn');
-            btn.disabled = true;
-            btn.textContent = '분석 중...';
-            document.getElementById('analysisResult').textContent = '';
-            document.getElementById('cheerMsg').style.display = 'none';
-
+    document.getElementById('screenshotInput').addEventListener('change', function() {
+        let file = this.files[0];
+        if (file) {
             let reader = new FileReader();
-            reader.onload = async function(e) {
-                let base64 = e.target.result.split(',')[1];
-                let mediaType = file.type;
-                try {
-                    let response = await fetch('/.netlify/functions/analyze', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ imageData: base64, mediaType: mediaType })
-                    });
-                    let data = await response.json();
-                    if (!data.content || !data.content[0]) throw new Error('API 응답 오류: ' + JSON.stringify(data));
-                    let result = data.content[0].text.trim().toUpperCase();
+            reader.onload = function(e) {
+                let preview = document.getElementById('preview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
 
-                    if (result.includes('YES')) {
-                        const name = localStorage.getItem('userName') || '';
-                        const josa = getJosa(name);
-                        document.getElementById('analysisResult').textContent = '✅ 학습을 확인했어요!';
-                        document.getElementById('analysisResult').style.color = 'green';
-                        const cheerEl = document.getElementById('cheerMsg');
-                        cheerEl.textContent = `${name}${josa} 오늘 하루 화이팅!`;
-                        cheerEl.style.display = 'block';
-                    } else {
-                        document.getElementById('analysisResult').textContent = '❌ 듀오링고 완료 화면이 아니에요. 다시 시도해주세요!';
-                        document.getElementById('analysisResult').style.color = 'red';
-                        btn.disabled = false;
-                        btn.textContent = '✅ AI로 확인하기';
-                    }
-                } catch (error) {
-                    document.getElementById('analysisResult').textContent = '오류가 발생했어요: ' + error.message;
+    document.getElementById('analyzeBtn').addEventListener('click', async function() {
+        let file = document.getElementById('screenshotInput').files[0];
+        if (!file) {
+            document.getElementById('analysisResult').textContent = '스크린샷을 먼저 업로드해주세요!';
+            document.getElementById('analysisResult').style.color = 'red';
+            return;
+        }
+        let btn = document.getElementById('analyzeBtn');
+        btn.disabled = true;
+        btn.textContent = '분석 중...';
+        document.getElementById('analysisResult').textContent = '';
+        document.getElementById('cheerMsg').style.display = 'none';
+
+        let reader = new FileReader();
+        reader.onload = async function(e) {
+            let base64 = e.target.result.split(',')[1];
+            let mediaType = file.type;
+            try {
+                let response = await fetch('/.netlify/functions/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ imageData: base64, mediaType: mediaType })
+                });
+                let data = await response.json();
+                if (!data.content || !data.content[0]) throw new Error('API 응답 오류: ' + JSON.stringify(data));
+                let result = data.content[0].text.trim().toUpperCase();
+
+                if (result.includes('YES')) {
+                    const name = localStorage.getItem('userName') || '';
+                    const lang = localStorage.getItem('userLanguage') || 'english';
+                    const config = langConfig[lang];
+                    document.getElementById('analysisResult').textContent = '✅ 학습을 확인했어요!';
+                    document.getElementById('analysisResult').style.color = 'green';
+                    const cheerEl = document.getElementById('cheerMsg');
+                    cheerEl.textContent = config.cheerMsg(name);
+                    cheerEl.style.display = 'block';
+                } else {
+                    document.getElementById('analysisResult').textContent = '❌ 듀오링고 완료 화면이 아니에요. 다시 시도해주세요!';
                     document.getElementById('analysisResult').style.color = 'red';
                     btn.disabled = false;
                     btn.textContent = '✅ AI로 확인하기';
                 }
-            };
-            reader.readAsDataURL(file);
-        });
+            } catch (error) {
+                document.getElementById('analysisResult').textContent = '오류가 발생했어요: ' + error.message;
+                document.getElementById('analysisResult').style.color = 'red';
+                btn.disabled = false;
+                btn.textContent = '✅ AI로 확인하기';
+            }
+        };
+        reader.readAsDataURL(file);
+    });
 
-        // 피커 초기화
-        buildCol(document.getElementById('hourCol'), hours, 8);
-        buildCol(document.getElementById('minCol'), mins, 30);
-
-        // 앱 시작
-        initApp();
-    </script>
+    buildCol(document.getElementById('hourCol'), hours, 8);
+    buildCol(document.getElementById('minCol'), mins, 30);
+    initApp();
+</script>
 </body>
 </html>
