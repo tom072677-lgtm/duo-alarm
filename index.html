@@ -346,7 +346,7 @@
                     <circle cx="140" cy="150" r="5" fill="#58CC02" style="animation:star-pop 0.8s ease-out forwards 0.4s; transform-origin:140px 150px; opacity:0;"/>
                 </svg>
             </div>
-            <img id="owlImg" class="owl-img owl-floating" src="duo-happy.jpg" alt="duo">
+            <img id="owlImg" class="owl-img owl-floating" src="duo-happy-jpg.jpg" alt="duo">
         </div>
 
         <!-- 파일 업로드 -->
@@ -450,12 +450,12 @@
         stars.className = 'star-wrap';
 
         if (state === 'thinking') {
-            owl.src = 'duo-think.jpeg';
+            owl.src = 'duo-think-jpeg.jpeg';
             owl.style.mixBlendMode = 'multiply';
             owl.className = 'owl-img owl-thinking';
             bubble.className = 'bubble show';
         } else if (state === 'happy') {
-            owl.src = 'duo-happy.jpg';
+            owl.src = 'duo-happy-jpg.jpg';
             owl.style.mixBlendMode = 'normal';
             owl.className = 'owl-img owl-jumping';
             stars.className = 'star-wrap show';
@@ -463,14 +463,14 @@
                 owl.className = 'owl-img owl-floating';
             }, 1800);
         } else if (state === 'sad') {
-            owl.src = 'duo-sad.webp';
+            owl.src = 'duo-sad-webp.webp';
             owl.style.mixBlendMode = 'normal';
             owl.className = 'owl-img owl-shaking';
             setTimeout(() => {
                 owl.className = 'owl-img owl-floating';
             }, 1000);
         } else {
-            owl.src = 'duo-happy.jpg';
+            owl.src = 'duo-happy-jpg.jpg';
             owl.style.mixBlendMode = 'normal';
             owl.className = 'owl-img owl-floating';
         }
