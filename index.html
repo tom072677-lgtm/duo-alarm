@@ -775,9 +775,8 @@
         const isAndroid = /android/i.test(navigator.userAgent);
         if (isAndroid) {
             // 앱이 있으면 앱으로, 없으면 플레이스토어로
-            location.href = 'intent://learn#Intent;scheme=duolingo;package=com.duolingo;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.duolingo;end';
+            location.href = 'intent://duolingo.com#Intent;scheme=https;package=com.duolingo;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.duolingo;end';
         } else {
-            // iOS: 앱이 있으면 앱으로, 없으면 앱스토어로
             location.href = 'duolingo://';
             setTimeout(() => {
                 window.location.href = 'https://apps.apple.com/app/duolingo/id570060128';
