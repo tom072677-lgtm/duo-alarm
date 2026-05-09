@@ -19,8 +19,25 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(clients.claim());
 });
 
+const STATIC_ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './duo-happy-jpg.jpg', './duo-think-jpeg.jpeg', './duo-sad-webp.webp'];
+
 self.addEventListener('fetch', (event) => {
-    event.respondWith(fetch(event.request));
+    const url = new URL(event.request.url);
+    // Netlify 함수는 항상 네트워크에서 가져옴
+    if (url.pathname.startsWith('/.netlify/')) {
+        event.respondWith(fetch(event.request));
+        return;
+    }
+    // 정적 파일은 캐시 우선, 없으면 네트워크
+    event.respondWith(
+        caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
+            if (response.ok && STATIC_ASSETS.some(a => url.pathname.endsWith(a.replace('./', '/')))) {
+                const clone = response.clone();
+                caches.open('duo-alarm-v1').then(c => c.put(event.request, clone));
+            }
+            return response;
+        }))
+    );
 });
 
 self.addEventListener('message', (event) => {
