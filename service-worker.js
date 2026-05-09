@@ -3,7 +3,7 @@ let alarmTimer = null;
 self.addEventListener('install', (event) => {
     self.skipWaiting();
     event.waitUntil(
-        caches.open('duo-alarm-v1').then((cache) => {
+        caches.open('duo-alarm-v2').then((cache) => {
             return cache.addAll([
                 './',
                 './index.html',
@@ -33,7 +33,7 @@ self.addEventListener('fetch', (event) => {
         caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
             if (response.ok && STATIC_ASSETS.some(a => url.pathname.endsWith(a.replace('./', '/')))) {
                 const clone = response.clone();
-                caches.open('duo-alarm-v1').then(c => c.put(event.request, clone));
+                caches.open('duo-alarm-v2').then(c => c.put(event.request, clone));
             }
             return response;
         }))
