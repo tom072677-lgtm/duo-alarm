@@ -829,7 +829,7 @@
             const base64 = e.target.result.split(',')[1];
             const mediaType = file.type;
             try {
-                const response = await fetch('https://duo-alarm.PLACEHOLDER.workers.dev', {
+                const response = await fetch('https://duo-alarm.tom072677.workers.dev', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ imageData: base64, mediaType })
