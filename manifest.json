@@ -1,7 +1,7 @@
 {
     "name": "duo-alarm",
     "short_name": "듀오알람",
-    "start_url": "/index.html",
+    "start_url": "/duo-alarm/index.html",
     "display": "standalone",
     "background_color": "#f0f8e8",
     "theme_color": "#58CC02",
