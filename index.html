@@ -774,9 +774,14 @@
         // 안드로이드는 intent://, iOS는 duolingo:// 사용
         const isAndroid = /android/i.test(navigator.userAgent);
         if (isAndroid) {
-            location.href = 'intent://duolingo.com#Intent;scheme=https;package=com.duolingo;S.browser_fallback_url=https%3A%2F%2Fwww.duolingo.com;end';
+            // 앱이 있으면 앱으로, 없으면 플레이스토어로
+            location.href = 'intent://learn#Intent;scheme=duolingo;package=com.duolingo;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.duolingo;end';
         } else {
+            // iOS: 앱이 있으면 앱으로, 없으면 앱스토어로
             location.href = 'duolingo://';
+            setTimeout(() => {
+                window.location.href = 'https://apps.apple.com/app/duolingo/id570060128';
+            }, 2000);
         }
         document.getElementById('preview').style.display = 'none';
         document.getElementById('preview').src = '';
