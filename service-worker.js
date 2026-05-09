@@ -49,13 +49,24 @@ self.addEventListener('message', (event) => {
         alarmTimer = setTimeout(async () => {
             alarmTimer = null;
             const clientList = await clients.matchAll({ type: 'window', includeUncontrolled: true });
-            clientList.forEach(client => client.postMessage({ type: 'ALARM_FIRED' }));
+
+            if (clientList.length > 0) {
+                // 앱이 열려있으면: 포그라운드로 올리고 바로 알람 발동
+                clientList.forEach(client => client.postMessage({ type: 'ALARM_FIRED' }));
+                try { await clientList[0].focus(); } catch(e) {}
+            } else {
+                // 앱이 닫혀있으면: 새 창으로 열기 (URL 파라미터로 알람 상태 전달)
+                await clients.openWindow('/?alarm=true');
+            }
+
+            // 알림은 화면이 꺼진 경우를 위한 백업용으로 항상 표시
             self.registration.showNotification('⏰ 알람!', {
                 body: '듀오링고를 완료하고 알람을 꺼주세요!',
                 icon: './icon-192.png',
                 vibrate: [500, 200, 500, 200, 500, 200, 500],
                 requireInteraction: true,
-                tag: 'duo-alarm'
+                tag: 'duo-alarm',
+                silent: false
             });
         }, delay);
     } else if (event.data.type === 'CANCEL_ALARM') {

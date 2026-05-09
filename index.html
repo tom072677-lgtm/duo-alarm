@@ -652,9 +652,13 @@
     }
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.addEventListener('message', (event) => {
+        navigator.serviceWorker.addEventListener('message', async (event) => {
             if (event.data.type === 'ALARM_FIRED') {
                 alarmTime = null;
+                // 백그라운드에서 복귀 시 AudioContext가 suspended일 수 있으므로 먼저 resume
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    await audioCtx.resume();
+                }
                 startAlarmSound();
                 showSection('alarmSection');
             }
@@ -767,7 +771,13 @@
     // 듀오링고 하러가기
     document.getElementById('goBtn').addEventListener('click', () => {
         stopAlarmSound();
-        window.open('duolingo://');
+        // 안드로이드는 intent://, iOS는 duolingo:// 사용
+        const isAndroid = /android/i.test(navigator.userAgent);
+        if (isAndroid) {
+            location.href = 'intent://duolingo.com#Intent;scheme=https;package=com.duolingo;S.browser_fallback_url=https%3A%2F%2Fwww.duolingo.com;end';
+        } else {
+            location.href = 'duolingo://';
+        }
         document.getElementById('preview').style.display = 'none';
         document.getElementById('preview').src = '';
         document.getElementById('screenshotInput').value = '';
